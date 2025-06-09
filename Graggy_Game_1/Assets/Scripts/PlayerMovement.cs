@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Data.Common;
 using System.Security.Cryptography;
 using UnityEngine;
 using UnityEngine.UIElements.Experimental;
@@ -15,7 +16,10 @@ public class PlayerMovement : MonoBehaviour
     [SerializeField] private LayerMask whatIsGround;
     private bool isGrounded;
 
-    
+    private int facingDirection = 1;
+    private bool facingLeft = true;
+
+
 
     void Start()
     {
@@ -25,21 +29,61 @@ public class PlayerMovement : MonoBehaviour
 
     void Update()
     {
-        xInput = Input.GetAxisRaw("Horizontal");
-
-        rb.velocity = new Vector2(xInput * moveSpeed, rb.velocity.y);
-
-        if (Input.GetKeyDown(KeyCode.Space))
-        {
-            rb.velocity = new Vector2(rb.velocity.x, jumpForce);
-        }
 
         isGrounded = Physics2D.Raycast(transform.position, Vector2.down, groundCheckDistance, whatIsGround);
+        xInput = Input.GetAxisRaw("Horizontal");   
 
+        CheckImput();
+        FlipController();
+
+    }
+
+    private void Movement()
+    {
+        rb.velocity = new Vector2(xInput * moveSpeed, rb.velocity.y);
+    }
+
+    private void CheckImput()
+    {
+
+        Movement();
+
+        if (Input.GetKeyDown(KeyCode.Space) || Input.GetKeyDown(KeyCode.W))
+        {
+            Jump();
+        }
     }
 
     private void OnDrawGizmos()
     {
         Gizmos.DrawLine(transform.position, new Vector3(transform.position.x, transform.position.y - groundCheckDistance));
+    }
+
+    private void Jump()
+    {
+        if (isGrounded)
+        {
+            rb.velocity = new Vector2(rb.velocity.x, jumpForce);
+        }
+    }
+
+    private void Flip()
+    {
+        facingDirection = facingDirection * -1;
+        facingLeft = !facingLeft;
+        transform.Rotate(0, 180, 0);
+    }
+
+    private void FlipController()
+    {
+        if (rb.velocity.x < 0 && !facingLeft)
+        {
+            Flip();
+        }
+
+        else if (rb.velocity.x > 0 && facingLeft)
+        {
+            Flip();
+        }
     }
 }
