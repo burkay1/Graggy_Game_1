@@ -9,13 +9,19 @@ public class PlayerMovement : MonoBehaviour
 {
     public Rigidbody2D rb;
     private float xInput;
+    [Header("Movement")]
     [SerializeField] private float jumpForce;
     [SerializeField] private float moveSpeed;
 
+    [Header("GroundCeck")]
     [SerializeField] private float groundCheckDistance;
     [SerializeField] private LayerMask whatIsGround;
     private bool isGrounded;
 
+    [Header("Dash")]
+    private bool ableToDash;
+    [SerializeField] private float dashDuration;
+    [SerializeField] private float dashTime;
     private int facingDirection = 1;
     private bool facingLeft = true;
 
@@ -29,6 +35,7 @@ public class PlayerMovement : MonoBehaviour
 
     void Update()
     {
+        dashTime -= Time.deltaTime;
 
         isGrounded = Physics2D.Raycast(transform.position, Vector2.down, groundCheckDistance, whatIsGround);
         xInput = Input.GetAxisRaw("Horizontal");   
