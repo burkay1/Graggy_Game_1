@@ -19,9 +19,15 @@ public class PlayerMovement : MonoBehaviour
     private bool isGrounded;
 
     [Header("Dash")]
-    private bool ableToDash;
+    private bool ableToDash = true;
     [SerializeField] private float dashDuration;
     [SerializeField] private float dashTime;
+    [SerializeField] private float dashForce;
+    [SerializeField] private float dashCooldown;
+    private float dashCooldownTimer;
+    
+    
+
     private int facingDirection = 1;
     private bool facingLeft = true;
 
@@ -30,12 +36,14 @@ public class PlayerMovement : MonoBehaviour
     void Start()
     {
         rb = GetComponent<Rigidbody2D>();
+    
     }
 
 
     void Update()
     {
         dashTime -= Time.deltaTime;
+        dashCooldownTimer -= Time.deltaTime;
 
         isGrounded = Physics2D.Raycast(transform.position, Vector2.down, groundCheckDistance, whatIsGround);
         xInput = Input.GetAxisRaw("Horizontal");   
@@ -45,20 +53,39 @@ public class PlayerMovement : MonoBehaviour
 
     }
 
+    private void Dash()
+    {
+
+
+        if (Input.GetKeyDown(KeyCode.LeftShift) && ableToDash && dashCooldownTimer < 0)
+        {
+            dashCooldownTimer = dashCooldown;
+            dashTime = dashDuration;
+        }
+    }
+
     private void Movement()
     {
         rb.velocity = new Vector2(xInput * moveSpeed, rb.velocity.y);
+
+        if (dashTime > 0)
+        {
+            rb.velocity = new Vector2(xInput * dashForce, 0);
+        }
     }
 
     private void CheckImput()
     {
 
         Movement();
+        Dash();
 
         if (Input.GetKeyDown(KeyCode.Space) || Input.GetKeyDown(KeyCode.W))
         {
             Jump();
         }
+
+        
     }
 
     private void OnDrawGizmos()
