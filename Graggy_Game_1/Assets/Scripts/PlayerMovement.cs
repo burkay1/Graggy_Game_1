@@ -9,9 +9,11 @@ public class PlayerMovement : MonoBehaviour
 {
     public Rigidbody2D rb;
     private float xInput;
+
     [Header("Movement")]
     [SerializeField] private float jumpForce;
     [SerializeField] private float moveSpeed;
+    private bool ableToMove = true;
 
     [Header("GroundCeck")]
     [SerializeField] private float groundCheckDistance;
@@ -19,12 +21,12 @@ public class PlayerMovement : MonoBehaviour
     private bool isGrounded;
 
     [Header("Dash")]
-    private bool ableToDash = true;
     [SerializeField] private float dashDuration;
     [SerializeField] private float dashTime;
     [SerializeField] private float dashForce;
     [SerializeField] private float dashCooldown;
     private float dashCooldownTimer;
+    private bool ableToDash = true;
     
     
 
@@ -66,12 +68,15 @@ public class PlayerMovement : MonoBehaviour
 
     private void Movement()
     {
-        rb.velocity = new Vector2(xInput * moveSpeed, rb.velocity.y);
+        if (ableToMove)
+        {
+            rb.velocity = new Vector2(xInput * moveSpeed, rb.velocity.y);
+        }
 
         if (dashTime > 0)
-        {
-            rb.velocity = new Vector2(xInput * dashForce, 0);
-        }
+            {
+                rb.velocity = new Vector2(xInput * dashForce, 0);
+            }
     }
 
     private void CheckImput()
