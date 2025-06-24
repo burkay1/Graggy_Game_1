@@ -12,6 +12,8 @@ public class PlayerMovement : MonoBehaviour
 
     [Header("Movement")]
     [SerializeField] private float jumpForce;
+    [SerializeField] private int jumpPool;
+    private int jumpCount;
     [SerializeField] private float moveSpeed;
     private bool ableToMove = true;
 
@@ -48,7 +50,12 @@ public class PlayerMovement : MonoBehaviour
         dashCooldownTimer -= Time.deltaTime;
 
         isGrounded = Physics2D.Raycast(transform.position, Vector2.down, groundCheckDistance, whatIsGround);
-        xInput = Input.GetAxisRaw("Horizontal");   
+        xInput = Input.GetAxisRaw("Horizontal");
+
+        while (isGrounded)
+        {
+            jumpCount = jumpPool;
+        }
 
         CheckImput();
         FlipController();
@@ -100,9 +107,12 @@ public class PlayerMovement : MonoBehaviour
 
     private void Jump()
     {
-        if (isGrounded)
+
+
+        if (jumpCount > 0)
         {
             rb.velocity = new Vector2(rb.velocity.x, jumpForce);
+            jumpCount--;
         }
     }
 
