@@ -668,13 +668,15 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1587944116}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: ff37529ae4b5a97419117c661ad5b123, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   rb: {fileID: 1587944120}
   jumpForce: 10
+  jumpPool: 1
+  jumpCount: 0
   moveSpeed: 10
   groundCheckDistance: 1.25
   whatIsGround:
@@ -921,7 +923,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   player: {fileID: 1587944119}
   smoothSpeed: 0.125
-  offset: {x: 0, y: 3, z: -5}
+  offset: {x: 0, y: 2, z: -5}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
