@@ -24,7 +24,8 @@
         [Header("Jump")]
         [SerializeField] private float jumpHeight = 20f;
         [SerializeField] private float jumpCutMultiplier;
-        public bool isJumping = false;
+        private bool isJumping = false;
+        private bool canJump = true;
 
         [Header("GroundCeck")]
         [SerializeField] private float groundCheckDistance;
@@ -89,6 +90,7 @@
             if(isGrounded && velocity.y < 0){
                 velocity.y = 0;
                 isJumping = false;
+                canJump = true; //enable jump for afterwards
             }
 
             //coyote time for jumping again and again flawlessly
@@ -103,11 +105,7 @@
 
         private void Dash()
         {
-            if (Input.GetKeyDown(KeyCode.LeftShift) && canDash && dashCooldownTimer < 0)
-            {
-                dashCooldownTimer = dashCooldown;
-                dashTime = dashDuration;
-            }
+           //dash function will be filled later
         }
 
         private void Movement()
@@ -142,12 +140,13 @@
 
         private void Jump()
         {
-            if (coyoteTimeCounter > 0f && jumpBufferCounter > 0f)
+            if (coyoteTimeCounter > 0f && jumpBufferCounter > 0f && canJump)
             {
                 velocity.y = jumpHeight;
                 isJumping = true;
 
                 //reset jumping counters
+                canJump = false;
                 coyoteTimeCounter = 0f; 
                 jumpBufferCounter = 0f;
             }
