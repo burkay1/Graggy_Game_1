@@ -43,6 +43,10 @@
         [SerializeField] private float coyoteTime = 0.1f;
         private float coyoteTimeCounter;
         
+        [Header("Jump Buffer")]
+        [SerializeField] float jumpBufferTime = 0.1f;
+        private float jumpBufferCounter;
+
 
         private int facingDirection = 1;
         private bool facingLeft = true;
@@ -64,7 +68,14 @@
             isGrounded = Physics2D.Raycast(transform.position, Vector2.down, groundCheckDistance, whatIsGround);
             xInput = Input.GetAxisRaw("Horizontal");   
 
-            CheckImput();
+            if(Input.GetKeyDown(KeyCode.Space)){
+                jumpBufferCounter = jumpBufferTime;
+            }
+            else{
+                jumpBufferCounter -= Time.deltaTime;
+            }
+
+            CheckInput();
             FlipController();
 
             //cut jump if space is relesed early
@@ -87,13 +98,11 @@
             else{
                 coyoteTimeCounter -= Time.deltaTime;
             }
-
+            Jump();
         }
 
         private void Dash()
         {
-
-
             if (Input.GetKeyDown(KeyCode.LeftShift) && canDash && dashCooldownTimer < 0)
             {
                 dashCooldownTimer = dashCooldown;
@@ -120,18 +129,10 @@
             transform.position += (Vector3)(velocity * Time.deltaTime);
         }
 
-        private void CheckImput()
+        private void CheckInput()
         {
-
             Movement();
             Dash();
-
-            if (Input.GetKeyDown(KeyCode.Space) || Input.GetKeyDown(KeyCode.W))
-            {
-                Jump();
-            }
-
-            
         }
 
         private void OnDrawGizmos()
@@ -141,11 +142,14 @@
 
         private void Jump()
         {
-            if (coyoteTimeCounter > 0f)
+            if (coyoteTimeCounter > 0f && jumpBufferCounter > 0f)
             {
                 velocity.y = jumpHeight;
                 isJumping = true;
+
+                //reset jumping counters
                 coyoteTimeCounter = 0f; 
+                jumpBufferCounter = 0f;
             }
         }
 
