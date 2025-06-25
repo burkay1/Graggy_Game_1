@@ -1,19 +1,30 @@
-using System.Collections;
+    using System.Collections;
 using System.Collections.Generic;
 using System.Data.Common;
 using System.Security.Cryptography;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UIElements.Experimental;
 
 public class PlayerMovement : MonoBehaviour
 {
-    public Rigidbody2D rb;
     private float xInput;
 
     [Header("Movement")]
     [SerializeField] private float jumpForce;
     [SerializeField] private float moveSpeed;
-    private bool ableToMove = true;
+    private bool canMove = true;
+    private Vector2 velocity;
+    
+    //to increase gravity when falling
+    [Header("CustomGravity")]
+    [SerializeField] private float gravity = -50f;
+    [SerializeField] private float fallGravityMultiplier = 2.5f;
+
+    [Header("Jump")]
+    [SerializeField] private float jumpHeight = 20f;
+    [SerializeField] private float jumpCutMultiplier = 0.5f;
+    public bool isJumping = false;
 
     [Header("GroundCeck")]
     [SerializeField] private float groundCheckDistance;
@@ -26,7 +37,7 @@ public class PlayerMovement : MonoBehaviour
     [SerializeField] private float dashForce;
     [SerializeField] private float dashCooldown;
     private float dashCooldownTimer;
-    private bool ableToDash = true;
+    private bool canDash = true;
     
     
 
@@ -37,7 +48,7 @@ public class PlayerMovement : MonoBehaviour
 
     void Start()
     {
-        rb = GetComponent<Rigidbody2D>();
+        
     
     }
 
@@ -53,13 +64,26 @@ public class PlayerMovement : MonoBehaviour
         CheckImput();
         FlipController();
 
+        //cut jump if space is relesed early
+        if(Input.GetKeyUp(KeyCode.Space)){
+            if(velocity.y < 0){
+                velocity.y *= jumpCutMultiplier;
+            }
+        }
+
+        //stop falling after reaching the ground
+        if(isGrounded && velocity.y < 0){
+            velocity.y = 0;
+            isJumping = false;
+        }
+
     }
 
     private void Dash()
     {
 
 
-        if (Input.GetKeyDown(KeyCode.LeftShift) && ableToDash && dashCooldownTimer < 0)
+        if (Input.GetKeyDown(KeyCode.LeftShift) && canDash && dashCooldownTimer < 0)
         {
             dashCooldownTimer = dashCooldown;
             dashTime = dashDuration;
@@ -68,15 +92,21 @@ public class PlayerMovement : MonoBehaviour
 
     private void Movement()
     {
-        if (ableToMove)
-        {
-            rb.velocity = new Vector2(xInput * moveSpeed, rb.velocity.y);
+        if (!canMove) return;
+       
+        velocity.x = xInput * moveSpeed;
+
+        //calculate & apply gravity if we are mid air
+        if(!isGrounded){
+            float appliedGravity = gravity;
+            //more gravity while falling
+            if (velocity.y < 0) appliedGravity *= fallGravityMultiplier;
+            
+            velocity.y += appliedGravity * Time.deltaTime;
         }
 
-        if (dashTime > 0)
-            {
-                rb.velocity = new Vector2(xInput * dashForce, 0);
-            }
+        //update position
+        transform.position += (Vector3)(velocity * Time.deltaTime);
     }
 
     private void CheckImput()
@@ -102,7 +132,8 @@ public class PlayerMovement : MonoBehaviour
     {
         if (isGrounded)
         {
-            rb.velocity = new Vector2(rb.velocity.x, jumpForce);
+            velocity.y = jumpHeight;
+            isJumping = true;
         }
     }
 
@@ -115,12 +146,12 @@ public class PlayerMovement : MonoBehaviour
 
     private void FlipController()
     {
-        if (rb.velocity.x < 0 && !facingLeft)
+        if (xInput < 0 && !facingLeft)
         {
             Flip();
         }
 
-        else if (rb.velocity.x > 0 && facingLeft)
+        else if (xInput > 0 && facingLeft)
         {
             Flip();
         }
