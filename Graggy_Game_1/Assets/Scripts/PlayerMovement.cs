@@ -12,8 +12,8 @@ public class PlayerMovement : MonoBehaviour
 
     [Header("Movement")]
     [SerializeField] private float jumpForce;
-    [SerializeField] private int jumpPool = 1;
-    [SerializeField] private int jumpCount;
+    [SerializeField] private int jumpPool;
+    private int jumpCount;
     [SerializeField] private float moveSpeed;
     private bool ableToMove = true;
 
@@ -52,7 +52,7 @@ public class PlayerMovement : MonoBehaviour
         isGrounded = Physics2D.Raycast(transform.position, Vector2.down, groundCheckDistance, whatIsGround);
         xInput = Input.GetAxisRaw("Horizontal");
 
-        if (isGrounded)
+        while (isGrounded)
         {
             jumpCount = jumpPool;
         }
@@ -81,11 +81,9 @@ public class PlayerMovement : MonoBehaviour
         }
 
         if (dashTime > 0)
-        {
-            rb.velocity = new Vector2(xInput * dashForce, 0);
-            return;
-        }
-
+            {
+                rb.velocity = new Vector2(xInput * dashForce, 0);
+            }
     }
 
     private void CheckImput()
