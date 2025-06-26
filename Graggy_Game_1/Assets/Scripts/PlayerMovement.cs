@@ -154,7 +154,7 @@
 
         private void Flip()
         {
-            facingDirection = facingDirection * -1;
+            facingDirection *= -1;
             facingLeft = !facingLeft;
             transform.Rotate(0, 180, 0);
         }
