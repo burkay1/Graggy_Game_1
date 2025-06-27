@@ -9,7 +9,6 @@
     public class PlayerMovement : MonoBehaviour
     {
         private float xInput;
-        private Rigidbody2D rb;
 
         [Header("Movement")]
         [SerializeField] private float jumpForce;
@@ -57,7 +56,8 @@
 
         void Start()
         {
-            rb = GetComponent<Rigidbody2D>();
+            
+        
         }
 
 
