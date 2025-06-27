@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 using System.Collections;
 using System.Collections.Generic;
 using System.Data.Common;
@@ -6,11 +7,20 @@ using Unity.VisualScripting;
 using UnityEditor.PackageManager;
 using UnityEngine;
 using UnityEngine.UIElements.Experimental;
+=======
+        using System.Collections;
+    using System.Collections.Generic;
+    using System.Data.Common;
+    using System.Security.Cryptography;
+    using Unity.VisualScripting;
+    using UnityEngine;
+    using UnityEngine.UIElements.Experimental;
+>>>>>>> parent of fdde6bd (karakteri tilemaple çarpıştıramıyorum amk)
 
     public class PlayerMovement : MonoBehaviour
     {
         private float xInput;
-        private BoxCollider2D collider;
+
         [Header("Movement")]
         [SerializeField] private float jumpForce;
         [SerializeField] private float moveSpeed;
@@ -33,10 +43,13 @@ using UnityEngine.UIElements.Experimental;
         [SerializeField] private LayerMask whatIsGround;
         private bool isGrounded;
 
+<<<<<<< HEAD
         [Header("Wall & Ceiling Check")]
         [SerializeField] private float ceilingCheckDistance = 0.1f;
         [SerializeField] private float wallCheckDistance = 0.1f;
 
+=======
+>>>>>>> parent of fdde6bd (karakteri tilemaple çarpıştıramıyorum amk)
         [Header("Dash")]
         [SerializeField] private float dashDuration;
         [SerializeField] private float dashTime;
@@ -61,7 +74,8 @@ using UnityEngine.UIElements.Experimental;
 
         void Start()
         {
-        collider = GetComponent<BoxCollider2D>();
+            
+        
         }
 
 
@@ -70,6 +84,7 @@ using UnityEngine.UIElements.Experimental;
             dashTime -= Time.deltaTime;
             dashCooldownTimer -= Time.deltaTime;
 
+<<<<<<< HEAD
             //check if grounded
             Vector2 leftOrigin = (Vector2)collider.bounds.center + Vector2.down * collider.bounds.extents.y;
             leftOrigin.x -= collider.bounds.extents.x / 2f;
@@ -81,12 +96,22 @@ using UnityEngine.UIElements.Experimental;
             bool rightGrounded = Physics2D.Raycast(rightOrigin, Vector2.down, groundCheckDistance, whatIsGround);
 
             isGrounded = leftGrounded || rightGrounded;
+=======
+            isGrounded = Physics2D.Raycast(transform.position, Vector2.down, groundCheckDistance, whatIsGround);
+            xInput = Input.GetAxisRaw("Horizontal");   
+>>>>>>> parent of fdde6bd (karakteri tilemaple çarpıştıramıyorum amk)
 
-            xInput = Input.GetAxisRaw("Horizontal");
+            if(Input.GetKeyDown(KeyCode.Space)){
+                jumpBufferCounter = jumpBufferTime;
+            }
+            else{
+                jumpBufferCounter -= Time.deltaTime;
+            }
 
             CheckInput();
             FlipController();
 
+<<<<<<< HEAD
 
             if (Input.GetKeyDown(KeyCode.Space))
         {
@@ -97,14 +122,14 @@ using UnityEngine.UIElements.Experimental;
             jumpBufferCounter -= Time.deltaTime;
         }
 
+=======
+>>>>>>> parent of fdde6bd (karakteri tilemaple çarpıştıramıyorum amk)
             //cut jump if space is relesed early
-        if (Input.GetKeyUp(KeyCode.Space))
-        {
-            if (velocity.y > 0)
-            {
-                velocity.y *= jumpCutMultiplier;
+            if(Input.GetKeyUp(KeyCode.Space)){
+                if(velocity.y > 0){
+                    velocity.y *= jumpCutMultiplier;
+                }
             }
-        }
 
             //stop falling after reaching the ground
             if(isGrounded && velocity.y < 0){
@@ -208,19 +233,10 @@ using UnityEngine.UIElements.Experimental;
         Dash();
     }
 
-    private void OnDrawGizmos()
-    {
-        Gizmos.DrawLine(transform.position, new Vector3(transform.position.x, transform.position.y - groundCheckDistance));
-        Gizmos.color = Color.red;
-        if (collider != null)
-{
-            Vector2 originRight = (Vector2)transform.position + Vector2.right * (collider.size.x / 2f + 0.01f);
-            Vector2 originLeft = (Vector2)transform.position + Vector2.left * (collider.size.x / 2f + 0.01f);
-
-            Gizmos.DrawLine(originRight, originRight + Vector2.right * wallCheckDistance);
-            Gizmos.DrawLine(originLeft, originLeft + Vector2.left * wallCheckDistance);
-}
-    }
+        private void OnDrawGizmos()
+        {
+            Gizmos.DrawLine(transform.position, new Vector3(transform.position.x, transform.position.y - groundCheckDistance));
+        }
 
         private void Jump()
         {
