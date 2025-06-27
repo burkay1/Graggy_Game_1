@@ -76,7 +76,7 @@
                 jumpBufferCounter -= Time.deltaTime;
             }
 
-            CheckInput();
+            //checkInputu fixedupdate e taşıdım
             FlipController();
 
             //cut jump if space is relesed early
@@ -103,10 +103,15 @@
             Jump();
         }
 
-        private void Dash()
-        {
-           //dash function will be filled later
-        }
+    void LateUpdate()
+    {
+        CheckInput();
+    }
+
+    private void Dash()
+    {
+        //dash function will be filled later
+    }
 
         private void Movement()
         {
