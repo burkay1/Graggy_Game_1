@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Data.Common;
 using System.Security.Cryptography;
 using Unity.VisualScripting;
-using UnityEditor.PackageManager;
 using UnityEngine;
 using UnityEngine.UIElements.Experimental;
 
@@ -36,6 +35,9 @@ using UnityEngine.UIElements.Experimental;
         [Header("Wall & Ceiling Check")]
         [SerializeField] private float ceilingCheckDistance = 0.1f;
         [SerializeField] private float wallCheckDistance = 0.1f;
+        private bool isTouchingCeiling;
+        private bool isTouchingLeftWall;
+        private bool isTouchingRightWall;
 
         [Header("Dash")]
         [SerializeField] private float dashDuration;
@@ -71,22 +73,33 @@ using UnityEngine.UIElements.Experimental;
             dashCooldownTimer -= Time.deltaTime;
 
             //check if grounded
-            Vector2 leftOrigin = (Vector2)collider.bounds.center + Vector2.down * collider.bounds.extents.y;
-            leftOrigin.x -= collider.bounds.extents.x / 2f;
-
-            Vector2 rightOrigin = (Vector2)collider.bounds.center + Vector2.down * collider.bounds.extents.y;
-            rightOrigin.x += collider.bounds.extents.x / 2f;
-
-            bool leftGrounded = Physics2D.Raycast(leftOrigin, Vector2.down, groundCheckDistance, whatIsGround);
-            bool rightGrounded = Physics2D.Raycast(rightOrigin, Vector2.down, groundCheckDistance, whatIsGround);
-
-            isGrounded = leftGrounded || rightGrounded;
+            isGrounded = Physics2D.Raycast(transform.position, Vector2.down, groundCheckDistance, whatIsGround);
 
             xInput = Input.GetAxisRaw("Horizontal");
 
             CheckInput();
             FlipController();
 
+            //check if touching ceiling
+            isTouchingCeiling = Physics2D.Raycast(transform.position, Vector2.up, ceilingCheckDistance, whatIsGround);
+            if (isTouchingCeiling && velocity.y > 0f)
+            {
+                velocity.y = 0f; //stop going up if you bump your head upwards
+            }
+        //check if touching wall on the right or left (same as ground check)
+            Vector2 originRight = (Vector2)transform.position + Vector2.right * (collider.size.x / 2f + 0.01f); 
+            Vector2 originLeft = (Vector2)transform.position + Vector2.left * (collider.size.x / 2f + 0.01f);
+            isTouchingRightWall = Physics2D.Raycast(originRight, Vector2.right, wallCheckDistance, whatIsGround);
+            if (isTouchingRightWall && velocity.x > 0f)
+            {
+                velocity.x = 0f;    
+            }
+
+            isTouchingLeftWall = Physics2D.Raycast(originLeft, Vector2.left, wallCheckDistance, whatIsGround);
+            if (isTouchingLeftWall && velocity.x < 0f)
+            {
+                velocity.x = 0f;    
+            }
 
             if (Input.GetKeyDown(KeyCode.Space))
         {
@@ -96,6 +109,8 @@ using UnityEngine.UIElements.Experimental;
         {
             jumpBufferCounter -= Time.deltaTime;
         }
+            
+
 
             //cut jump if space is relesed early
         if (Input.GetKeyUp(KeyCode.Space))
@@ -128,85 +143,30 @@ using UnityEngine.UIElements.Experimental;
            //dash function will be filled later
         }
 
-    private void Movement()
-    {
-        if (!canMove) return;
-
-        velocity.x = xInput * moveSpeed;
-
-        //calculate & apply gravity if we are mid air
-        if (!isGrounded)
+        private void Movement()
         {
-            float appliedGravity = gravity;
-            //more gravity while falling
-            if (velocity.y < 0) appliedGravity *= fallGravityMultiplier;
-
-            velocity.y += appliedGravity * Time.deltaTime;
-        }
-
-        MoveAndCollide(); //hareketten sonra çarpışmalar kontrol edildiği için hep bir hareket oluyordu,
-                        //bunun için çarpışma kontrolünü hareketle tek fonksiyonda yapmam gerekti
-        }
-
-    private void MoveAndCollide()
-    {
-        Vector2 newPosition = transform.position;
-
-        //x ekseninde hareket
-        if (velocity.x != 0)
-        {
-            //yönü hız değerinin pozitif/negatifliğinden anla ve başlangıç koordinatını al
-            Vector2 direction = Vector2.right * Mathf.Sign(velocity.x);
-            Vector2 origin = (Vector2)collider.bounds.center + direction * (collider.bounds.extents.x + 0.01f);
-
-            RaycastHit2D hit = Physics2D.Raycast(origin, direction, Mathf.Abs(velocity.x * Time.deltaTime), whatIsGround);
-            if (hit.collider == null)
-            {
-                newPosition.x += velocity.x * Time.deltaTime;
-            }
-            else
-            {
-                float offset = collider.bounds.extents.x;
-                if (velocity.x > 0) newPosition.x = hit.point.x - offset;
-                else if (velocity.x < 0) newPosition.x = hit.point.x + offset;
-
-                velocity.x = 0;
-            }
-
-        }
-
-        //y eksenide hareket
-        if (velocity.y != 0)
-        {
-            Vector2 direction = Vector2.up * Mathf.Sign(velocity.y);
-            Vector2 origin = (Vector2)transform.position + direction * (collider.size.y / 2f + collider.offset.y + 0.01f);
-
-            float rayLength = Mathf.Max(Mathf.Abs(velocity.y * Time.deltaTime), 0.1f);
-            RaycastHit2D hit = Physics2D.Raycast(origin, direction, rayLength, whatIsGround);
-
-            if (hit.collider == null)
-            {
-                 newPosition.y += velocity.y * Time.deltaTime;
-            }
-            else
-            {
-                float offset = collider.bounds.extents.y;
-                if (velocity.y > 0)
-                    newPosition.y = hit.point.y - offset;
-                else
-                    newPosition.y = hit.point.y + offset;
-                    velocity.y = 0;
-            }
-        }
-        transform.position = newPosition;       
-    }
+            if (!canMove) return;
         
+            velocity.x = xInput * moveSpeed;
+
+            //calculate & apply gravity if we are mid air
+            if(!isGrounded){
+                float appliedGravity = gravity;
+                //more gravity while falling
+                if (velocity.y < 0) appliedGravity *= fallGravityMultiplier;
+                
+                velocity.y += appliedGravity * Time.deltaTime;
+            }
+
+            //update position
+            transform.position += (Vector3)(velocity * Time.deltaTime);
+        }
 
         private void CheckInput()
-    {
-        Movement();
-        Dash();
-    }
+        {
+            Movement();
+            Dash();
+        }
 
     private void OnDrawGizmos()
     {
